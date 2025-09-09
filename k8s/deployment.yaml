@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resume-analyzer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: resume-analyzer
+  template:
+    metadata:
+      labels:
+        app: resume-analyzer
+    spec:
+      containers:
+      - name: resume-analyzer
+        image: docker.io/nguyenkkent/resume-analyzer:latest
+        ports:
+        - containerPort: 8000
