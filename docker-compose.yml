@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  embedder:
+    build:
+      context: ./services/embedder-pytorch
+      dockerfile: Dockerfile
+    container_name: resume-embedder
+    ports:
+      - "8000:8000"   
+    env_file:
+      - .env          
+    volumes:
+      - ./services/embedder-pytorch:/app
+    restart: unless-stopped
+
+  agent:
+    build:
+      context: ./services/agent
+      dockerfile: Dockerfile
+    container_name: resume-agent
+    ports:
+      - "8100:8100"   
+    env_file:
+      - .env
+    volumes:
+      - ./services/agent:/app
+    restart: unless-stopped
