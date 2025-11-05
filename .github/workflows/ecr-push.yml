@@ -32,6 +32,16 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      # Sanity check
+      - name: Show AWS identity and region
+        run: |
+          aws sts get-caller-identity
+          echo "Region: $AWS_REGION"
+
+      - name: List ECR repos in this region
+        run: |
+          aws ecr describe-repositories --region "$AWS_REGION" --query "repositories[].repositoryName" || true
+
       # Embedder image
       - name: Build embedder
         run: |
