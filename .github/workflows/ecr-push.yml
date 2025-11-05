@@ -1,0 +1,51 @@
+name: Build and Push to ECR
+
+on:
+  push:
+    branches: [ "main" ]
+  # Manual trigger
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ECR_ACCOUNT_ID: ${{ secrets.ECR_ACCOUNT_ID }}
+  EMBEDDER_REPO: rolefit-embedder
+  AGENT_REPO: rolefit-agent
+  IMAGE_TAG: latest  # or use ${{ github.sha }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Embedder image
+      - name: Build embedder
+        run: |
+          docker build -t $ECR_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$EMBEDDER_REPO:$IMAGE_TAG ./services/embedder-pyTorch
+
+      - name: Push embedder
+        run: |
+          docker push $ECR_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$EMBEDDER_REPO:$IMAGE_TAG
+
+      # Agent image
+      - name: Build agent
+        run: |
+          docker build -t $ECR_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$AGENT_REPO:$IMAGE_TAG ./services/agent
+
+      - name: Push agent
+        run: |
+          docker push $ECR_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$AGENT_REPO:$IMAGE_TAG
