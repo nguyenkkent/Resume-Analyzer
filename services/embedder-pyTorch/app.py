@@ -23,6 +23,10 @@ class ScoreJobsReq(BaseModel):
     resume_sections: List[str]
     jobs: List[Job]
 
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+    
 @app.post("/score_jobs")
 def score_jobs(req: ScoreJobsReq):
     resume_vectors = model.encode(req.resume_sections)
